@@ -143,8 +143,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=["GET"])
     def download_shopping_cart(self, request):
         response = HttpResponse(content_type="application/pdf")
-        response["Content-Disposition"] = ("attachment; "
-                                        "filename=shopping_cart.pdf")
+        response["Content-Disposition"] = (
+            "attachment; "
+            "filename=shopping_cart.pdf"
+        )
 
         p = canvas.Canvas(response)
         arial = ttfonts.TTFont("Arial", "data/arial.ttf")
