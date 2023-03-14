@@ -19,12 +19,16 @@ from api.serializers import (CreateRecipeSerializer, CustomUserSerializer,
                              IngredientSerializer, RecipeSerializer,
                              ShoppingCartSerializer, TagSerializer)
 
+from reportlab.pdfbase import pdfmetrics, ttfonts
+from reportlab.pdfgen import canvas
+
 
 class TagViewSet(viewsets.ModelViewSet):
     """Вьюсет для работы с тегами."""
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
@@ -32,6 +36,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    pagination_class = None
 
 
 class UsersViewSet(UserViewSet):
@@ -140,16 +145,39 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["GET"])
     def download_shopping_cart(self, request):
-        ingredients = (
-            IngredientAmount.objects.filter(
-                recipe__shopping_list__user=request.user
-            )
-            .order_by("ingredient__name")
-            .values("ingredient__name", "ingredient__measurement_unit")
-            .annotate(amount=Sum("amount"))
+        response = HttpResponse(content_type="application/pdf")
+        response["Content-Disposition"] = ("attachment; "
+                                        "filename=shopping_cart.pdf")
+
+        p = canvas.Canvas(response)
+        arial = ttfonts.TTFont("Arial", "data/arial.ttf")
+        pdfmetrics.registerFont(arial)
+        p.setFont("Arial", 14)
+
+        ingredients = IngredientAmount.objects.filter(
+            recipe__shopping_cart__user=request.user
+        ).values_list(
+            "ingredient__name", "amount", "ingredient__unit"
         )
-        filename = "shopping_list"
-        return self.send_message(ingredients, filename)
+
+        ingr_list = {}
+        for name, amount, unit in ingredients:
+            if name not in ingr_list:
+                ingr_list[name] = {"amount": amount, "unit": unit}
+            else:
+                ingr_list[name]["amount"] += amount
+        height = 700
+
+        p.drawString(100, 750, "Список покупок")
+        for i, (name, data) in enumerate(ingr_list.items(), start=1):
+            p.drawString(
+                80, height, f"{i}. {name} – {data['amount']} {data['unit']}"
+            )
+            height -= 25
+        p.showPage()
+        p.save()
+
+        return response
 
     @action(
         detail=True,

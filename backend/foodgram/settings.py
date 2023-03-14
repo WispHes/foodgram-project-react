@@ -28,7 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*', ]
 
-# CSRF_TRUSTED_ORIGINS = ['*', ]
+# CSRF_TRUSTED_ORIGINS = ['*', '127.0.0.1:81', ]
 # Application definition
 
 INSTALLED_APPS = [
