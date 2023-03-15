@@ -114,7 +114,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         for ingredient in ingredients:
             shopping_list += (
                 f"\n{ingredient['ingredient__name']} "
-                f"({ingredient['ingredient__measurement_unit']}) - "
+                f"({ingredient['ingredient__unit']}) - "
                 f"{ingredient['amount']}"
             )
         file = filename
