@@ -2,16 +2,15 @@ from django.http.response import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from reportlab.pdfbase import pdfmetrics, ttfonts
-from reportlab.pdfgen import canvas
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-from api.filters import RecipeFilter
+from api.filters import RecipeFilter, IngredientFilter
+from api.generate_pdf import generate_shopping_cart_pdf
 from api.permissions import AuthorPermission
-from api.serializers import (CreateRecipeSerializer, CustomUserSerializer,
+from api.serializers import (CreateRecipeSerializer, UsersSerializer,
                              FavoriteSerializer, FollowSerializer,
                              IngredientSerializer, RecipeSerializer,
                              ShoppingCartSerializer, TagSerializer)
@@ -33,6 +32,8 @@ class IngredientViewSet(viewsets.ModelViewSet):
 
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = IngredientFilter
     pagination_class = None
 
 
@@ -40,18 +41,19 @@ class UsersViewSet(UserViewSet):
     """Вьюсет для работы с пользователями и подписками. """
 
     queryset = User.objects.all()
-    serializer_class = CustomUserSerializer
+    serializer_class = UsersSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)
     http_method_names = ["get", "post", "delete", "head"]
 
+    def get_user_and_author(self, request, id):
+        return request.user, get_object_or_404(User, id=id)
+
     @action(
-        methods=["POST", "DELETE"],
+        methods=["POST", ],
         detail=True,
     )
     def subscribe(self, request, id):
-        user = request.user
-        author = get_object_or_404(User, id=id)
-
+        user, author = self.get_user_and_author(request, id)
         if user == author:
             return Response(
                 {"error": "Невозможно подписаться на себя"},
@@ -61,24 +63,25 @@ class UsersViewSet(UserViewSet):
         subscription, created = Subscription.objects.get_or_create(
             user=user, author=author
         )
-
-        if request.method == "POST":
-            if created:
-                return Response(
-                    FollowSerializer(
-                        author, context={"request": request}
-                    ).data,
-                    status=status.HTTP_201_CREATED,
-                )
+        if created:
             return Response(
-                {"error": "Вы уже подписаны"},
-                status=status.HTTP_400_BAD_REQUEST,
+                FollowSerializer(
+                    author, context={"request": request}
+                ).data,
+                status=status.HTTP_201_CREATED,
             )
+        return Response(
+            {"error": "Вы уже подписаны"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
-        if request.method == "DELETE":
-            get_object_or_404(
-                Subscription, author=author, user=user
-            ).delete()
+    @subscribe.mapping.delete
+    def subscribe_delete(self, request, id):
+        user, author = self.get_user_and_author(request, id)
+        subscription = get_object_or_404(
+            Subscription, author=author, user=user
+        )
+        subscription.delete()
         return Response(
             {"error": "Вы не подписаны на этого пользователя"},
             status=status.HTTP_400_BAD_REQUEST,
@@ -142,41 +145,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["GET"])
     def download_shopping_cart(self, request):
-        response = HttpResponse(content_type="application/pdf")
-        response["Content-Disposition"] = (
-            "attachment; "
-            "filename=shopping_cart.pdf"
-        )
-
-        p = canvas.Canvas(response)
-        arial = ttfonts.TTFont("Arial", "data/arial.ttf")
-        pdfmetrics.registerFont(arial)
-        p.setFont("Arial", 14)
-
-        ingredients = IngredientAmount.objects.filter(
-            recipe__shopping_cart__user=request.user
-        ).values_list(
-            "ingredient__name", "amount", "ingredient__unit"
-        )
-
-        ingr_list = {}
-        for name, amount, unit in ingredients:
-            if name not in ingr_list:
-                ingr_list[name] = {"amount": amount, "unit": unit}
-            else:
-                ingr_list[name]["amount"] += amount
-        height = 700
-
-        p.drawString(100, 750, "Список покупок")
-        for i, (name, data) in enumerate(ingr_list.items(), start=1):
-            p.drawString(
-                80, height, f"{i}. {name} – {data['amount']} {data['unit']}"
-            )
-            height -= 25
-        p.showPage()
-        p.save()
-
-        return response
+        return generate_shopping_cart_pdf(request)
 
     @action(
         detail=True,
@@ -215,6 +184,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def destroy_favorite(self, request, pk):
         return self.remove_from_model(
             model_class=Favorite,
-            user=request.user,
+            user=request.user.id,
             recipe_id=pk
         )

@@ -1,6 +1,7 @@
 import csv
 from django.conf import settings
 from django.core.management import BaseCommand
+from django.db.utils import IntegrityError
 from recipes.models import Ingredient
 
 
@@ -14,8 +15,12 @@ class Command(BaseCommand):
         ) as file:
             reader = csv.reader(file)
             next(reader)
-            ingredients = [
-                Ingredient(name=row[0], unit=row[1]) for row in reader
-            ]
-            Ingredient.objects.bulk_create(ingredients)
+            for row in reader:
+                name, unit = row
+                try:
+                    Ingredient.objects.create(name=name, unit=unit)
+                except IntegrityError:
+                    self.stdout.write(
+                        f'Ингредиент {name} уже существует в базе данных'
+                    )
         self.stdout.write(self.style.SUCCESS('Все ингридиенты загружены!'))

@@ -168,8 +168,14 @@ DJOSER = {
         'user': ['djoser.permissions.CurrentUserOrAdminOrReadOnly'],
     },
     'SERIALIZERS': {
-        'user': 'api.serializers.CustomUserSerializer',
-        'current_user': 'api.serializers.CustomUserSerializer',
-        'user_create': 'api.serializers.CustomUserCreateSerializer',
+        'user': 'api.serializers.UsersSerializer',
+        'current_user': 'api.serializers.UsersSerializer',
     },
 }
+
+
+EMAIL_MAX_LENGHT = 254
+USERS_MAX_LENGHT = 150
+RECIPES_MAX_LENGHT = 255
+COLOR_MAX_LENGHT = 7
+UNIT_MAX_LENGHT = 64

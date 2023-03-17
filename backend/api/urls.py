@@ -5,10 +5,10 @@ from api.views import (IngredientViewSet, RecipeViewSet, TagViewSet,
                        UsersViewSet)
 
 router = routers.DefaultRouter()
-router.register(r'tags', TagViewSet)
-router.register(r'ingredients', IngredientViewSet)
-router.register(r'recipes', RecipeViewSet)
-router.register(r'users', UsersViewSet)
+router.register('tags', TagViewSet)
+router.register('ingredients', IngredientViewSet)
+router.register('recipes', RecipeViewSet)
+router.register('users', UsersViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
