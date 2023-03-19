@@ -88,13 +88,6 @@ class Recipe(models.Model):
     text = models.TextField(
         verbose_name='Текстовое описание рецепта',
     )
-    # ingredients = models.ManyToManyField(
-    #     Ingredient,
-    #     through='IngredientAmount',
-    #     verbose_name='Список ингредиентов',
-    #     related_name='ingredient_amounts',
-    #     through_fields=('recipe', 'ingredient'),
-    # )
     tags = models.ManyToManyField(
         Tag,
         verbose_name='Тег',

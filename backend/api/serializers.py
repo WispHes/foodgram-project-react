@@ -26,6 +26,14 @@ class UsersSerializer(serializers.ModelSerializer):
         return False
 
 
+class RecipeInfoSerializer(serializers.ModelSerializer):
+    """Сериализатор для отображения краткой информации о рецепте."""
+
+    class Meta:
+        model = Recipe
+        fields = ("id", "name", "image", "cooking_time")
+
+
 class FollowSerializer(UsersSerializer):
     """Сериализатор для работы с подписками."""
 
@@ -41,7 +49,7 @@ class FollowSerializer(UsersSerializer):
         return Recipe.objects.filter(author=obj.pk)
 
     def get_recipes(self, obj):
-        serializer = RecipeSerializer(
+        serializer = RecipeInfoSerializer(
             self.get_queryset(obj),
             many=True,
             context={"request": self.context.get("request")},
