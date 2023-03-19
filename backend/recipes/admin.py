@@ -30,16 +30,16 @@ class IngredientAdmin(admin.ModelAdmin):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
 
-    def favorite_count(self, obj):
-        return obj.favorite_count()
-
-    favorite_count.short_description = 'Добавлен в избранное'
-
-    list_display = ('id', 'name', 'author', 'favorite_count',)
+    list_display = ('id', 'name', 'author', 'get_favorites_count')
     list_filter = ('name', 'author', 'tags')
     search_fields = ('name', )
     inlines = (IngredientAmountInline,)
     empty_value_display = '-пусто-'
+
+    def get_favorites_count(self, obj):
+        return Favorite.objects.filter(recipe=obj).count()
+
+    get_favorites_count.short_description = 'Добавлен в избранное'
 
 
 @admin.register(Favorite)

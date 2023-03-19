@@ -46,7 +46,7 @@ class Tag(models.Model):
         unique=True,
         validators=[
                 RegexValidator(
-                    r'^#([A-Fa-f0-9]{3}){1,2}$',
+                    r'^#([A-Fa-f0-9]){3,6}$',
                     message='Введите цвет в формате HEX'
                 )
             ],
@@ -88,13 +88,13 @@ class Recipe(models.Model):
     text = models.TextField(
         verbose_name='Текстовое описание рецепта',
     )
-    ingredients = models.ManyToManyField(
-        Ingredient,
-        through='IngredientAmount',
-        verbose_name='Список ингредиентов',
-        related_name='ingredient_amounts',
-        through_fields=('recipe', 'ingredient'),
-    )
+    # ingredients = models.ManyToManyField(
+    #     Ingredient,
+    #     through='IngredientAmount',
+    #     verbose_name='Список ингредиентов',
+    #     related_name='ingredient_amounts',
+    #     through_fields=('recipe', 'ingredient'),
+    # )
     tags = models.ManyToManyField(
         Tag,
         verbose_name='Тег',
@@ -128,7 +128,7 @@ class IngredientAmount(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='ingredient_amounts',
+        related_name='ingredients',
     )
     amount = models.PositiveIntegerField(
         verbose_name='Количество',
