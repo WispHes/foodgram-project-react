@@ -45,16 +45,16 @@ class Tag(models.Model):
         max_length=settings.COLOR_MAX_LENGHT,
         unique=True,
         validators=[
-                RegexValidator(
-                    r'^#([A-Fa-f0-9]){3,6}$',
-                    message='Введите цвет в формате HEX'
-                )
-            ],
-        )
+            RegexValidator(
+                r'^#([A-Fa-f0-9]){3,6}$',
+                message='Введите цвет в формате HEX'
+            )
+        ],
+    )
     slug = models.SlugField(
         verbose_name='Уникальный слаг',
         unique=True,
-        )
+    )
 
     class Meta:
         ordering = ('name', )

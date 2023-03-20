@@ -7,15 +7,16 @@ from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-from api.filters import RecipeFilter, IngredientFilter
+
+from api.filters import IngredientFilter, RecipeFilter
 from api.generate_pdf import generate_shopping_cart_pdf
 from api.permissions import AuthorPermission
-from api.serializers import (CreateRecipeSerializer, UsersSerializer,
-                             FavoriteSerializer, FollowSerializer,
-                             IngredientSerializer, RecipeSerializer,
-                             ShoppingCartSerializer, TagSerializer)
-from recipes.models import (Favorite, Ingredient, Recipe,
-                            ShoppingCart, Subscription, Tag)
+from api.serializers import (CreateRecipeSerializer, FavoriteSerializer,
+                             FollowSerializer, IngredientSerializer,
+                             RecipeSerializer, ShoppingCartSerializer,
+                             TagSerializer, UsersSerializer)
+from recipes.models import (Favorite, Ingredient, Recipe, ShoppingCart,
+                            Subscription, Tag)
 from users.models import User
 
 

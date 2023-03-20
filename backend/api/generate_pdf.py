@@ -1,6 +1,7 @@
 from django.http.response import HttpResponse
 from reportlab.pdfbase import pdfmetrics, ttfonts
 from reportlab.pdfgen import canvas
+
 from recipes.models import Recipe
 
 
