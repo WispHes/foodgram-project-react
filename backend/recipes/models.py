@@ -87,6 +87,7 @@ class Recipe(models.Model):
     )
     text = models.TextField(
         verbose_name='Текстовое описание рецепта',
+        max_length=settings.TEXT_MAX_LENGHT,
     )
     tags = models.ManyToManyField(
         Tag,
@@ -102,7 +103,7 @@ class Recipe(models.Model):
     )
 
     class Meta:
-        ordering = ('pub_date', )
+        ordering = ('-pub_date', )
         verbose_name = 'Рецептов'
         verbose_name_plural = 'Рецепты'
 
