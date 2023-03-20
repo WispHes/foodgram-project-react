@@ -1,3 +1,3 @@
 # Foodgram
 
-![workflow](https://github.com/wisphes/Foodgram/actions/workflows/main.yml/badge.svg)
+![foodgram-project-react Workflow Status](https://github.com/wisphes/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg?branch=master&event=push)
