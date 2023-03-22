@@ -79,7 +79,8 @@ class UsersViewSet(UserViewSet):
     @subscribe.mapping.delete
     def subscribe_delete(self, request, id):
         get_object_or_404(
-            Subscription, user=request.user, author=get_object_or_404(User, pk=id)
+            Subscription, user=request.user,
+            author=get_object_or_404(User, pk=id)
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

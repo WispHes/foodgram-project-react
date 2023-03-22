@@ -2,8 +2,6 @@ from django.http.response import HttpResponse
 from reportlab.pdfbase import pdfmetrics, ttfonts
 from reportlab.pdfgen import canvas
 
-from recipes.models import IngredientAmount
-
 
 def generate_shopping_cart_pdf(user):
     """Генерация списка покупок в виде PDF формата"""
