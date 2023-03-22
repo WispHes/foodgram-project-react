@@ -2,10 +2,10 @@ from django.http.response import HttpResponse
 from reportlab.pdfbase import pdfmetrics, ttfonts
 from reportlab.pdfgen import canvas
 
-from recipes.models import Recipe
+from recipes.models import IngredientAmount
 
 
-def generate_shopping_cart_pdf(request):
+def generate_shopping_cart_pdf(user):
     """Генерация списка покупок в виде PDF формата"""
     response = HttpResponse(content_type="application/pdf")
     response["Content-Disposition"] = ("attachment; "
@@ -16,12 +16,10 @@ def generate_shopping_cart_pdf(request):
     pdfmetrics.registerFont(arial)
     p.setFont("Arial", 14)
 
-    ingredients = Recipe.objects.filter(
-        author__shopping_cart__user=request.user
-    ).values_list(
-        "ingredients__ingredient__name",
-        "ingredients__amount",
-        "ingredients__ingredient__unit"
+    ingredients = user.shopping_cart.values_list(
+        "recipe__ingredients__ingredient__name",
+        "recipe__ingredients__amount",
+        "recipe__ingredients__ingredient__unit"
     )
 
     ingr_list = {}

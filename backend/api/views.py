@@ -78,15 +78,10 @@ class UsersViewSet(UserViewSet):
 
     @subscribe.mapping.delete
     def subscribe_delete(self, request, id):
-        user, author = self.get_user_and_author(request, id)
-        subscription = get_object_or_404(
-            Subscription, author=author, user=user
-        )
-        subscription.delete()
-        return Response(
-            {"error": "Вы не подписаны на этого пользователя"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        get_object_or_404(
+            Subscription, user=request.user, author=get_object_or_404(User, pk=id)
+        ).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
@@ -146,7 +141,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["GET"])
     def download_shopping_cart(self, request):
-        return generate_shopping_cart_pdf(request)
+        return generate_shopping_cart_pdf(request.user)
 
     @action(
         detail=True,
