@@ -50,8 +50,15 @@ class FollowSerializer(UsersSerializer):
         return Recipe.objects.filter(author=obj.pk)
 
     def get_recipes(self, obj):
+        queryset = self.get_queryset(obj)
+        recipes_limit = (
+            self.context['request'].query_params.get('recipes_limit')
+        )
+        if recipes_limit:
+            queryset = queryset[:int(recipes_limit)]
+
         serializer = RecipeInfoSerializer(
-            self.get_queryset(obj),
+            queryset,
             many=True,
             context={"request": self.context.get("request")},
         )
